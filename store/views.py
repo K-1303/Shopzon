@@ -1,9 +1,63 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import json
 import datetime
 from .models import * 
 from .utils import cookieCart, cartData, guestOrder
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from .models import Customer, Order, OrderItem, ShippingAddress
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('store')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('store')
+
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+
+            # Create a related customer object with default values
+            customer = Customer.objects.create(user=user, name=user.username, email="abc@gmail.com")
+
+            # Create an order related to the customer with default values
+            order = Order.objects.create(customer=customer, complete=False, transaction_id='12345')
+
+            # Create a shipping address related to the customer and order with default values
+            shipping_address = ShippingAddress.objects.create(
+                customer=customer,
+                order=order,
+                address='123 Main St',
+                city='City',
+                state='State',
+                zipcode='12345'
+            )
+
+            return redirect('store')
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
+
 
 def store(request):
 	data = cartData(request)
