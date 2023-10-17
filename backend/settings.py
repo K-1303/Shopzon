@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +29,23 @@ SECRET_KEY = 'django-insecure-n6ilb%1uy@^e$_2xv7-0-ku(-kdnigf37g6nqc&oscm$g7=*uj
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get the absolute path of the root directory
+root_dir = os.path.abspath(os.path.join(script_dir, '..'))
+
+# Construct the absolute file path of .env
+env_file_path = os.path.join(root_dir, '.env')
+
+# Load environment variables from .env file
+load_dotenv(env_file_path)
+
+# Access environment variables
+DATABASE_NAME = os.getenv('DATABASE_NAME')
+USER = os.getenv('USER')
+DATABASE_PASS = os.getenv('DATABASE_PASS')
+HOST = os.getenv('HOST')
 
 
 # Application definition
@@ -76,10 +95,15 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+  'default': {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': DATABASE_NAME,
+    'USER': USER,
+    'PASSWORD': DATABASE_PASS,
+    'HOST': HOST,
+    'PORT': '5432',
+    'OPTIONS': {'sslmode': 'require'},
+  }
 }
 
 
