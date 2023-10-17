@@ -42,10 +42,10 @@ env_file_path = os.path.join(root_dir, '.env')
 load_dotenv(env_file_path)
 
 # Access environment variables
-DATABASE_NAME = os.getenv('DATABASE_NAME')
-USER = os.getenv('USER')
-DATABASE_PASS = os.getenv('DATABASE_PASS')
-HOST = os.getenv('HOST')
+DATABASE_NAME = 'shopzon' #Eos.getenv('DATABASE_NAME')
+USER = 'postgres' #os.getenv('USER')
+DATABASE_PASS = 'abc@1234' #os.getenv('DATABASE_PASS')
+HOST = 'localhost' #os.getenv('HOST')
 
 
 # Application definition
