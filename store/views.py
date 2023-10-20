@@ -13,6 +13,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Customer, Order, OrderItem, ShippingAddress
+from django.db.models import Q
 
 def login_view(request):
     if request.method == 'POST':
@@ -144,3 +145,19 @@ def processOrder(request):
 		)
 
 	return JsonResponse('Payment submitted..', safe=False)
+
+
+def search_products(request):
+    query = request.GET.get('q')
+
+    data = cartData(request)
+    cartItems = data['cartItems']
+
+    if query:
+        products = Product.objects.filter(Q(name__icontains=query))
+    else:
+        products = Product.objects.all()
+
+    context = {'products': products, 'cartItems': cartItems}
+    return render(request, 'store/store.html', context)
+
