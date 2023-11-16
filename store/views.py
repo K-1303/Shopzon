@@ -14,6 +14,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Customer, Order, OrderItem, ShippingAddress
 from django.db.models import Q
+import nltk
+nltk.download('wordnet')
+from nltk.corpus import wordnet
 
 def login_view(request):
     if request.method == 'POST':
@@ -147,16 +150,34 @@ def processOrder(request):
 	return JsonResponse('Payment submitted..', safe=False)
 
 
+def get_synonyms(word):
+    synonyms = set()
+    for syn in wordnet.synsets(word):
+        for lemma in syn.lemmas():
+            synonyms.add(lemma.name())
+    return list(synonyms)
+
 def search_products(request):
+    # Get the search query from the request
     query = request.GET.get('q')
 
     data = cartData(request)
     cartItems = data['cartItems']
 
+    # Start with a base queryset that includes all products
+    products = Product.objects.all()
+
     if query:
-        products = Product.objects.filter(Q(name__icontains=query))
-    else:
-        products = Product.objects.all()
+        # Include the original query and its synonyms
+        synonyms = get_synonyms(query)
+        search_terms = [query] + synonyms
+
+        # Use Q objects to combine queries for related terms
+        related_terms_query = Q()
+        for term in search_terms:
+            related_terms_query |= Q(name__icontains=term)
+        
+        products = products.filter(related_terms_query)
 
     context = {'products': products, 'cartItems': cartItems}
     return render(request, 'store/store.html', context)
