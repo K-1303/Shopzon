@@ -175,7 +175,7 @@ def search_products(request):
         # Use Q objects to combine queries for related terms
         related_terms_query = Q()
         for term in search_terms:
-            related_terms_query |= Q(name__icontains=term)
+            related_terms_query |= Q(name__icontains=term) | Q(category__icontains=term)
         
         products = products.filter(related_terms_query)
 
