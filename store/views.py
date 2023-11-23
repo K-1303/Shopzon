@@ -64,15 +64,17 @@ def register_view(request):
 
 
 def store(request):
-	data = cartData(request)
+    data = cartData(request)
 
-	cartItems = data['cartItems']
-	order = data['order']
-	items = data['items']
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
 
-	products = Product.objects.all()
-	context = {'products':products, 'cartItems':cartItems}
-	return render(request, 'store/store.html', context)
+    random_products = Product.objects.all().order_by('?')[:6]
+
+    context = {'products': random_products, 'cartItems': cartItems}
+    return render(request, 'store/store.html', context)
+
 
 
 def cart(request):
